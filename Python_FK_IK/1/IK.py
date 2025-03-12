@@ -1,6 +1,5 @@
 import math
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 from math import comb
 
@@ -145,7 +144,6 @@ def choose_right_angle(theta_previous, theta_current, curve_points):
     weights = np.array([60, 50, 40, 3, 2, 1])
     for i in range(8):
         err_theta = abs(theta_current[i] - theta_previous[0])
-        err_T = np.linalg.norm(curve_points - Forward_Kinematics(d, a, alpha, theta_current[i])[:3, -1])
         cumulative_error[0, i] = np.dot(err_theta, weights)
 
     min_error_index = np.argmin(cumulative_error)
@@ -182,7 +180,6 @@ if __name__ == "__main__":
     # 三维贝塞尔曲线参数
     num_points = 20
     control_points = [[-0.817, -0.233, 0.062], [-0.887, -0.203, 0.062], [-0.917, -0.133, 0.062]]
-    # 生成S型曲线的控制点
     # control_points = [[-0.817, -0.233, 0.062], [-0.717, -0.133, 0.162], [-0.617, -0.233, 0.062], [-0.517, -0.333, 0.162], [-0.417, -0.233, 0.062]]
     curve_points = generate_bezier_curve_3d(control_points, num_points)
 
@@ -196,8 +193,6 @@ if __name__ == "__main__":
         theta_current = Inverse_Kinematics(d, a, T06_current) 
         min_error_index = choose_right_angle(theta_previous, theta_current, curve_points[i])
         joint[i] = theta_current[min_error_index]
-        hh = Forward_Kinematics(d, a, alpha, joint[i])
-
         theta_previous = joint[i]
             
     points = np.zeros((num_points, 3))

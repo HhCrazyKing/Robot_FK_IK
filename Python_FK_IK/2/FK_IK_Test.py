@@ -5,29 +5,19 @@ from math import sqrt as sqrt
 '''保留小数点后七位，并且在第七位后进行四舍五入'''
 def atan2(first, second):
     return round(math.atan2(first,second), 7)
+
 def sin(radians_angle):
     return round(math.sin(radians_angle), 7)
+
 def cos(radians_angle):
     return round(math.cos(radians_angle), 7)
+
 def acos(value):
     return round(math.acos(value), 7)
+
 def round_value(value):
     return round(value, 7)
 
-PI = math.pi
-
-alpha1,alpha2,alpha3,alpha4,alpha5,alpha6 = PI/2 , 0 , 0 , PI/2 , -PI/2 , 0
-a1,a2,a3,a4,a5,a6 = 0 , -130 , -140 , 0 , 0 , 0
-d1,d2,d3,d4,d5,d6 = 159 , 0 , 0 , 68.5 , 75 , 32.09
-theta1,theta2,theta3,theta4,theta5,theta6 = math.radians(10),math.radians(-90),math.radians(-30),math.radians(-90),math.radians(40),math.radians(61)
-
-'''
-    gama : 绕x轴旋转; beta : 绕y轴旋转; alpha : 绕z轴旋转
-    这个也可以用来计算末端执行器位姿
-    print("gama:",atan2(T60[2,1], T60[2,2]) )  
-    print("beta:",atan2(-T60[2,0], sqrt(T60[2,1] ** 2 + T60[2,2] ** 2)))  
-    print("alpha:",atan2(T60[1,0], T60[0,0]))  
-'''
 def Forward_Kinematics(th1,th2,th3,th4,th5,th6):
     T1 = np.array([[cos(th1) , 0 , sin(th1) , 0],
                    [sin(th1) , 0 , -cos(th1) , 0],
@@ -317,8 +307,20 @@ def Inverse_Kinematics(X, Y, Z, gama, beta, alpha):  # 需要给一个三维坐�
                 [theta1_2, theta2_7, theta3_7, theta4_7, theta5_4, theta6_4],
                 [theta1_2, theta2_8, theta3_8, theta4_8, theta5_4, theta6_4]]
 
+'''
+    gama : 绕x轴旋转; beta : 绕y轴旋转; alpha : 绕z轴旋转
+    这个也可以用来计算末端执行器位姿
+    print("gama:",atan2(T60[2,1], T60[2,2]) )  
+    print("beta:",atan2(-T60[2,0], sqrt(T60[2,1] ** 2 + T60[2,2] ** 2)))  
+    print("alpha:",atan2(T60[1,0], T60[0,0]))  
+'''
 
-#输入theta1~theta2得值后，得到的运动学正解值会传入运动学逆解中，最后再输出运动学逆解得值;可以测试输出的几组值中有否有在正确的角度值
+PI = math.pi
+alpha1,alpha2,alpha3,alpha4,alpha5,alpha6 = PI/2 , 0 , 0 , PI/2 , -PI/2 , 0
+a1,a2,a3,a4,a5,a6 = 0 , -425 , -392 , 0 , 0 , 0
+d1,d2,d3,d4,d5,d6 = 162 , 0 , 0 , 133 , 100 , 100
+
+theta1,theta2,theta3,theta4,theta5,theta6 = math.radians(80),math.radians(-90),math.radians(-30),math.radians(-90),math.radians(40),math.radians(61)
 pos = Forward_Kinematics(theta1,theta2,theta3,theta4,theta5,theta6)
 print("通过正运动学得到得X,Y,Z,gama,beta,alpha值: ",pos)
 angel = Inverse_Kinematics(pos[0],pos[1],pos[2],pos[3],pos[4],pos[5])
