@@ -1,6 +1,5 @@
 import math
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 from math import comb
 
@@ -138,6 +137,19 @@ def Inverse_Kinematics(d, a, T06):
        
     return r2d(theta)
 
+# 选择最接近的角度
+def choose_right_angle(theta_previous, theta_current):
+
+    cumulative_error = np.zeros((1, 8))
+    weights = np.array([60, 50, 40, 3, 2, 1])
+    for i in range(8):
+        err_theta = abs(theta_current[i] - theta_previous)
+        cumulative_error[0, i] = np.dot(err_theta, weights)
+
+    min_error_index = np.argmin(cumulative_error)
+
+    return min_error_index
+
 # 生成三维贝塞尔曲线
 def generate_bezier_curve_3d(control_points, num_points=100):
 
@@ -157,52 +169,50 @@ def generate_bezier_curve_3d(control_points, num_points=100):
 
     return curve
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
+    
     #DH参数
     d = np.array([0.162, 0.00000, 0.00000, 0.133, 0.1, 0.1])
     a = np.array([0.000000, -0.4250, -0.392, 0.000000, 0.000000, 0.000000])
     alpha = np.array([np.pi/2, 0.00000, 0.00000, np.pi/2, -np.pi/2, 0.000000])
-    theta_0 = np.array([6, 5, 4, 3, 2, 1])
 
-    T = Forward_Kinematics(d, a, alpha, theta_0)
-    T = [[1, 0, 0, -0.817], [0, 0, -1, -0.833], [0, 1, 0, 0.062], [0, 0, 0, 1]]
-    T = np.array(T)
-    print(T)
+    # 三维贝塞尔曲线参数
+    num_points = 20
+    control_points = [[-0.817, -0.233, 0.062], [-0.767, -0.233, 0.062], [-0.717, -0.233, 0.062]]
+    # control_points = [[-0.817, -0.233, 0.062], [-0.717, -0.133, 0.162], [-0.617, -0.233, 0.062], [-0.517, -0.333, 0.162], [-0.417, -0.233, 0.062]]
+    curve_points = generate_bezier_curve_3d(control_points, num_points)
 
-    theta = Inverse_Kinematics(d, a, T)
-
-    for i in range(8):
-        print(f"[{i}] ", end="")
-        for j in range(6):
-            th = theta[i, j]
-            print(f"theta{j + 1}={th}  ", end="")
-        print()
-    
-    n = 0
-    T_test = Forward_Kinematics(d, a, alpha, theta[n, :])
-    print(T_test)
-
-    # num_points = 200
-    # control_points = [[-0.817, -0.233, 0.062], [-0.817, -0.733, 0.062], [-0.817, -1.233, 0.062]]
-    # curve_points = generate_bezier_curve_3d(control_points, num_points)
-
-    # T = Forward_Kinematics(d, a, alpha, theta_0)  
-    # T[:3, -1] = [-0.817, -0.833, 0.062]
-    # print(T)
-
-    # theta = Inverse_Kinematics(d, a, T)
-    # for i in range(8):
-    #     print(f"[{i}] ", end="")
-    #     for j in range(6):
-    #         th = theta[i, j]
-    #         print(f"theta{j + 1}={th}  ", end="")
-    #     print()
-    
-    # n = 0
-    # T_test = Forward_Kinematics(d, a, alpha, theta[n, :])
-    # print(T_test)
-
-
-      
+    joint = np.zeros((num_points, 6))
+    joint[0] = np.array([0, 0, 0, 0, 0, 0])
+    theta_previous = joint[0]
+    T06_current = Forward_Kinematics(d, a, alpha, joint[0])
+        
+    for i in range(1, num_points):
+        T06_current[:3, -1] = curve_points[i]
+        theta_current = Inverse_Kinematics(d, a, T06_current) 
+        min_error_index = choose_right_angle(theta_previous, theta_current)
+        joint[i] = theta_current[min_error_index]
+        theta_previous = joint[i]
             
+    points = np.zeros((num_points, 3))
+    for i in range(0, num_points):
+        T = Forward_Kinematics(d, a, alpha, joint[i])
+        points[i] = T[:3, -1]
+
+    fig = plt.figure()
+    # 参考曲线
+    ax1 = fig.add_subplot(121, projection='3d')
+    ax1.scatter(curve_points[:, 0], curve_points[:, 1], curve_points[:, 2], c='r', marker='o')
+    ax1.set_xlabel('X Label')
+    ax1.set_ylabel('Y Label')
+    ax1.set_zlabel('Z Label')
+    ax1.set_title('Curve Points')
+    # 实际曲线
+    ax2 = fig.add_subplot(122, projection='3d')
+    ax2.scatter(points[:, 0], points[:, 1], points[:, 2], c='r', marker='o')
+    ax2.set_xlabel('X Label')
+    ax2.set_ylabel('Y Label')
+    ax2.set_zlabel('Z Label')
+    ax2.set_title('Points')
+    plt.show()

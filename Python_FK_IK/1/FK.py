@@ -28,8 +28,6 @@ def forward_kinematics(joint_angles):
     return T
 
 # 示例关节角度（弧度）
-# joint_angles = [0, -np.pi/4, np.pi/2, 0, np.pi/4, 0]
 joint_angles = [0, 0, 0, 0, np.pi/4, 0]
 T_total = forward_kinematics(joint_angles)
 print("末端执行器的变换矩阵：\n", T_total)
-print("末端位置：", T_total[:3, 3])
